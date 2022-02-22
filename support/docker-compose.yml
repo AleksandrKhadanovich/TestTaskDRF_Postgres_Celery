@@ -1,0 +1,54 @@
+version: '3'
+
+services:
+    web:
+        build:
+            context: .
+        ports:
+            - "8000:8000"
+        volumes:
+            - .:/support
+        command:
+            sh -c "python manage.py wait_for_db &&
+                python manage.py makemigrations && 
+                python manage.py migrate && 
+                python manage.py createsuperuser --noinput || python manage.py runserver 0.0.0.0:8000 &&
+                python manage.py runserver 0.0.0.0:8000"
+
+        env_file:
+          - ./.env.dev
+        depends_on:
+            - db
+            - redis
+    db:
+        image: postgres
+        restart: always
+        ports:
+            - "5432:5432"
+        env_file:
+            - ./.env.dev
+        volumes:
+            - postgres_data:/var/lib/postgresql/data/
+    redis:
+        image: redis
+        restart: always
+        command: redis-server
+        ports:
+            - '6379:6379'
+    celery:
+        restart: always
+        build:
+            context: .
+        command: celery -A users worker -l info -E
+        volumes:
+            - .:/support
+        env_file:
+            - ./.env.dev
+
+        depends_on:
+            - redis
+            - web
+            - db
+
+volumes:
+    postgres_data:
