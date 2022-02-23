@@ -24,7 +24,7 @@ Necessary data:
 url: http://127.0.0.1:8000/api/v1/support/new/
 Necessary data:
 "comment":""
-JWT token authorization
+JWT token authorization (JWT "name_of_token" )
 
 ### To view user's own tickets and support replies:
 url: http://127.0.0.1:8000/api/v1/support/list/
